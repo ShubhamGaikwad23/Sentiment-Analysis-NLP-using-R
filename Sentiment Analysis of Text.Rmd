@@ -1,0 +1,57 @@
+
+
+```{r}
+install.packages("tidytext")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("textdata")
+``` 
+
+
+
+```{r}
+# Load necessary libraries
+library(tidytext)
+library(dplyr)
+library(ggplot2)
+library(textdata)
+
+# Example text data
+text_data <- c("I love R programming. It's amazing!",
+               "I hate bugs in my code.",
+               "Debugging is challenging but rewarding.",
+               "This is a nightmare, nothing works!",
+               "What a beautiful day to code.")
+
+# Convert text data to a tibble
+text_df <- tibble(line = 1:length(text_data), text = text_data)
+
+# Unnest tokens
+text_df <- text_df %>%
+  unnest_tokens(word, text)
+
+# Get sentiment scores
+sentiment_scores <- get_sentiments("bing")
+
+# Join the scores with our text data
+text_df <- text_df %>%
+  inner_join(sentiment_scores, by = "word")
+
+# Summarize sentiment score
+sentiment_summary <- text_df %>%
+  group_by(line) %>%
+  summarize(sentiment = sum(ifelse(sentiment == "positive", 1, -1)))
+
+# Print summary
+print(sentiment_summary)
+
+# Optional: Create a simple plot to visualize the sentiment scores
+ggplot(sentiment_summary, aes(x = line, y = sentiment, fill = sentiment > 0)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = c("TRUE" = "green", "FALSE" = "red")) +
+  labs(x = "Line Number", y = "Sentiment Score", title = "Sentiment Analysis of Text Data") +
+  theme_minimal()
+
+
+```
+
